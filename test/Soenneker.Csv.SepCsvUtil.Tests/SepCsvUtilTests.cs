@@ -29,7 +29,7 @@ public class SepCsvUtilTests : FixturedUnitTest
     public void Write_And_Read_Should_Preserve_Data()
     {
         // Arrange
-        var tempPath = Path.Combine(Path.GetTempPath(), $"people_{Guid.NewGuid()}.csv");
+        string tempPath = Path.Combine(Path.GetTempPath(), $"people_{Guid.NewGuid()}.csv");
 
         var people = new List<Person>
         {
@@ -39,7 +39,7 @@ public class SepCsvUtilTests : FixturedUnitTest
 
         // Act
         _csvUtil.Write(people, tempPath);
-        var result = _csvUtil.Read<Person>(tempPath);
+        List<Person> result = _csvUtil.Read<Person>(tempPath);
 
         // Assert
         result.Should().NotBeNull();
@@ -64,11 +64,11 @@ public class SepCsvUtilTests : FixturedUnitTest
     public void Read_Should_Handle_Empty_File()
     {
         // Arrange
-        var tempPath = Path.Combine(Path.GetTempPath(), $"empty_{Guid.NewGuid()}.csv");
+        string tempPath = Path.Combine(Path.GetTempPath(), $"empty_{Guid.NewGuid()}.csv");
         File.WriteAllText(tempPath, string.Empty);
 
         // Act
-        var result = _csvUtil.Read<Person>(tempPath);
+        List<Person> result = _csvUtil.Read<Person>(tempPath);
 
         // Assert
         result.Should().NotBeNull();
@@ -81,7 +81,7 @@ public class SepCsvUtilTests : FixturedUnitTest
     public void Write_Should_Create_File()
     {
         // Arrange
-        var tempPath = Path.Combine(Path.GetTempPath(), $"write_{Guid.NewGuid()}.csv");
+        string tempPath = Path.Combine(Path.GetTempPath(), $"write_{Guid.NewGuid()}.csv");
         var people = new List<Person>
         {
             new Person { Name = "Charlie", Age = 20, IsActive = true, BirthDate = DateTime.Today }
@@ -93,7 +93,7 @@ public class SepCsvUtilTests : FixturedUnitTest
         // Assert
         File.Exists(tempPath).Should().BeTrue();
 
-        var content = File.ReadAllText(tempPath);
+        string content = File.ReadAllText(tempPath);
         content.Should().Contain("Charlie");
 
         File.Delete(tempPath);
