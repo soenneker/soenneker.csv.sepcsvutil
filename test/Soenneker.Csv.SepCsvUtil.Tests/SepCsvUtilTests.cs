@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using Soenneker.Csv.SepCsvUtil.Tests.Dtos;
 using Xunit;
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace Soenneker.Csv.SepCsvUtil.Tests;
 
