@@ -12,7 +12,7 @@ using Soenneker.Extensions.Type;
 namespace Soenneker.Csv.SepCsvUtil;
 
 /// <inheritdoc cref="ISepCsvUtil"/>
-public class SepCsvUtil : ISepCsvUtil
+public sealed class SepCsvUtil : ISepCsvUtil
 {
     private readonly ILogger<SepCsvUtil> _logger;
 
