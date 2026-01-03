@@ -43,6 +43,6 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.1" />
         <PackageReference Include="Sep" Version="0.12.1" />
-        <PackageReference Include="Soenneker.Extensions.Type" Version="4.0.657" />
+        <PackageReference Include="Soenneker.Extensions.Type" Version="4.0.660" />
     </ItemGroup>
 </Project>
