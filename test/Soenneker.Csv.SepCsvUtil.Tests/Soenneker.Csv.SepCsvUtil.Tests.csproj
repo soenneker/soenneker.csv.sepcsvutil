@@ -27,7 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Soenneker.Csv.SepCsvUtil.csproj" />
+        <ProjectReference Include="..\..\src\Soenneker.Csv.SepCsvUtil\Soenneker.Csv.SepCsvUtil.csproj" />
     </ItemGroup>
 
     <ItemGroup>
