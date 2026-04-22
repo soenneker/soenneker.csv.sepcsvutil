@@ -1,31 +1,30 @@
-﻿using Soenneker.Csv.SepCsvUtil.Abstract;
-using Soenneker.Tests.FixturedUnit;
+using Soenneker.Csv.SepCsvUtil.Abstract;
+using Soenneker.Tests.HostedUnit;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using Soenneker.Csv.SepCsvUtil.Tests.Dtos;
-using Xunit;
 using AwesomeAssertions;
 
 namespace Soenneker.Csv.SepCsvUtil.Tests;
 
-[Collection("Collection")]
-public class SepCsvUtilTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public class SepCsvUtilTests : HostedUnitTest
 {
     private readonly ISepCsvUtil _csvUtil;
 
-    public SepCsvUtilTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public SepCsvUtilTests(Host host) : base(host)
     {
         _csvUtil = Resolve<ISepCsvUtil>(true);
     }
 
-    [Fact]
+    [Test]
     public void Default()
     {
         // This test is intentionally left blank.
     }
 
-    [Fact]
+    [Test]
     public void Write_And_Read_Should_Preserve_Data()
     {
         // Arrange
@@ -60,7 +59,7 @@ public class SepCsvUtilTests : FixturedUnitTest
             File.Delete(tempPath);
     }
 
-    [Fact]
+    [Test]
     public void Read_Should_Handle_Empty_File()
     {
         // Arrange
@@ -77,7 +76,7 @@ public class SepCsvUtilTests : FixturedUnitTest
         File.Delete(tempPath);
     }
 
-    [Fact]
+    [Test]
     public void Write_Should_Create_File()
     {
         // Arrange
