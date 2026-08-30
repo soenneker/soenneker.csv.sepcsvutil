@@ -8,5 +8,8 @@ namespace Soenneker.Csv.SepCsvUtil.Tests.Dtos
         public int Age { get; set; }
         public bool IsActive { get; set; }
         public DateTime BirthDate { get; set; }
+        public decimal Balance { get; set; }
+        public string Note { get; set; } = string.Empty;
+        public string DisplayName => $"{Name} ({Age})";
     }
 }

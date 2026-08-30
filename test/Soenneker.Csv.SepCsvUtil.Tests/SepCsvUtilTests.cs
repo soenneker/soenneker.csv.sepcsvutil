@@ -3,6 +3,7 @@ using Soenneker.Tests.HostedUnit;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Globalization;
 using Soenneker.Csv.SepCsvUtil.Tests.Dtos;
 using AwesomeAssertions;
 
@@ -96,5 +97,43 @@ public class SepCsvUtilTests : HostedUnitTest
         content.Should().Contain("Charlie");
 
         File.Delete(tempPath);
+    }
+
+    [Test]
+    public void Write_And_Read_Use_Invariant_Formats_And_Preserve_Empty_Strings()
+    {
+        string tempPath = Path.Combine(Path.GetTempPath(), $"culture_{Guid.NewGuid()}.csv");
+        CultureInfo previousCulture = CultureInfo.CurrentCulture;
+
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
+            var people = new List<Person>
+            {
+                new()
+                {
+                    Name = "Alice",
+                    Age = 30,
+                    BirthDate = new DateTime(1994, 4, 1, 12, 30, 0, DateTimeKind.Utc),
+                    Balance = 12.5m,
+                    Note = string.Empty
+                }
+            };
+
+            _csvUtil.Write(people, tempPath);
+            List<Person> result = _csvUtil.Read<Person>(tempPath);
+
+            result.Should().ContainSingle();
+            result[0].Balance.Should().Be(12.5m);
+            result[0].BirthDate.Should().Be(people[0].BirthDate);
+            result[0].Note.Should().BeEmpty();
+            File.ReadAllText(tempPath).Should().NotContain("DisplayName");
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previousCulture;
+            if (File.Exists(tempPath))
+                File.Delete(tempPath);
+        }
     }
 }

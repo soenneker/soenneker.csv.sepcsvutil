@@ -3,6 +3,8 @@ using Soenneker.Csv.SepCsvUtil.Abstract;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using nietras.SeparatedValues;
@@ -11,12 +13,9 @@ using Soenneker.Extensions.Type;
 
 namespace Soenneker.Csv.SepCsvUtil;
 
-/// <inheritdoc cref="ISepCsvUtil"/>
 public sealed class SepCsvUtil : ISepCsvUtil
 {
     private readonly ILogger<SepCsvUtil> _logger;
-
-    private readonly bool _log = true;
 
     // TODO: ReflectionCache
     private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _propertyCache = new();
@@ -46,12 +45,20 @@ public sealed class SepCsvUtil : ISepCsvUtil
                 string propertyName = property.Name;
                 var propertyValue = row[propertyName].ToString();
 
-                if (!propertyValue.IsNullOrWhiteSpace())
+                if (property.PropertyType == typeof(string))
                 {
-                    object? convertedValue = property.PropertyType.ConvertPropertyValue(propertyValue);
-                    if (convertedValue != null)
-                        property.SetValue(obj, convertedValue);
+                    property.SetValue(obj, propertyValue);
+                    continue;
                 }
+
+                if (propertyValue.IsNullOrWhiteSpace())
+                    continue;
+
+                object? convertedValue = property.PropertyType.ConvertPropertyValue(propertyValue);
+                if (convertedValue is null)
+                    throw new InvalidOperationException($"CSV column '{propertyName}' could not be converted to {property.PropertyType.FullName}.");
+
+                property.SetValue(obj, convertedValue);
             }
 
             objects.Add(obj);
@@ -76,7 +83,7 @@ public sealed class SepCsvUtil : ISepCsvUtil
                 object? value = property.GetValue(data);
 
                 if (value != null)
-                    row[property.Name].Set(value.ToString());
+                    row[property.Name].Set(FormatValue(value));
                 else
                     row[property.Name].Set("");
             }
@@ -85,8 +92,22 @@ public sealed class SepCsvUtil : ISepCsvUtil
 
     private static PropertyInfo[] GetCachedProperties(Type type)
     {
-        return _propertyCache.GetOrAdd(type, t => t.GetProperties(BindingFlags.Instance | BindingFlags.Public));
+        return _propertyCache.GetOrAdd(type, static t => t.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                                                           .Where(static property => property.CanRead && property.CanWrite &&
+                                                               property.GetIndexParameters().Length == 0)
+                                                           .ToArray());
     }
+
+    private static string FormatValue(object value) => value switch
+    {
+        DateTime dateTime => dateTime.ToString("O", CultureInfo.InvariantCulture),
+        DateTimeOffset dateTimeOffset => dateTimeOffset.ToString("O", CultureInfo.InvariantCulture),
+        DateOnly dateOnly => dateOnly.ToString("O", CultureInfo.InvariantCulture),
+        TimeOnly timeOnly => timeOnly.ToString("O", CultureInfo.InvariantCulture),
+        TimeSpan timeSpan => timeSpan.ToString("c", CultureInfo.InvariantCulture),
+        IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture) ?? string.Empty,
+        _ => value.ToString() ?? string.Empty
+    };
 
     private static T CreateInstance<T>()
     {
