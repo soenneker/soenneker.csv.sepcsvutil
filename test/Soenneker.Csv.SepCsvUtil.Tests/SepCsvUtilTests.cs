@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+using Soenneker.Utils.File.Abstract;
 using Soenneker.Csv.SepCsvUtil.Abstract;
 using Soenneker.Tests.HostedUnit;
 using System;
@@ -12,10 +14,13 @@ namespace Soenneker.Csv.SepCsvUtil.Tests;
 [ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
 public class SepCsvUtilTests : HostedUnitTest
 {
+    private readonly IFileUtil _fileUtil;
+
     private readonly ISepCsvUtil _csvUtil;
 
     public SepCsvUtilTests(Host host) : base(host)
     {
+        _fileUtil = Resolve<IFileUtil>(true);
         _csvUtil = Resolve<ISepCsvUtil>(true);
     }
 
@@ -26,7 +31,7 @@ public class SepCsvUtilTests : HostedUnitTest
     }
 
     [Test]
-    public void Write_And_Read_Should_Preserve_Data()
+    public async Task Write_And_Read_Should_Preserve_Data()
     {
         // Arrange
         string tempPath = Path.Combine(Path.GetTempPath(), $"people_{Guid.NewGuid()}.csv");
@@ -56,16 +61,16 @@ public class SepCsvUtilTests : HostedUnitTest
         result[1].BirthDate.Should().Be(new DateTime(1979, 7, 15));
 
         // Cleanup
-        if (File.Exists(tempPath))
-            File.Delete(tempPath);
+        if ((await _fileUtil.Exists(tempPath)))
+            await _fileUtil.Delete(tempPath);
     }
 
     [Test]
-    public void Read_Should_Handle_Empty_File()
+    public async Task Read_Should_Handle_Empty_File()
     {
         // Arrange
         string tempPath = Path.Combine(Path.GetTempPath(), $"empty_{Guid.NewGuid()}.csv");
-        File.WriteAllText(tempPath, string.Empty);
+        await _fileUtil.Write(tempPath, string.Empty);
 
         // Act
         List<Person> result = _csvUtil.Read<Person>(tempPath);
@@ -74,11 +79,11 @@ public class SepCsvUtilTests : HostedUnitTest
         result.Should().NotBeNull();
         result.Should().BeEmpty();
 
-        File.Delete(tempPath);
+        await _fileUtil.Delete(tempPath);
     }
 
     [Test]
-    public void Write_Should_Create_File()
+    public async Task Write_Should_Create_File()
     {
         // Arrange
         string tempPath = Path.Combine(Path.GetTempPath(), $"write_{Guid.NewGuid()}.csv");
@@ -91,16 +96,16 @@ public class SepCsvUtilTests : HostedUnitTest
         _csvUtil.Write(people, tempPath);
 
         // Assert
-        File.Exists(tempPath).Should().BeTrue();
+        (await _fileUtil.Exists(tempPath)).Should().BeTrue();
 
-        string content = File.ReadAllText(tempPath);
+        string content = (await _fileUtil.Read(tempPath));
         content.Should().Contain("Charlie");
 
-        File.Delete(tempPath);
+        await _fileUtil.Delete(tempPath);
     }
 
     [Test]
-    public void Write_And_Read_Use_Invariant_Formats_And_Preserve_Empty_Strings()
+    public async Task Write_And_Read_Use_Invariant_Formats_And_Preserve_Empty_Strings()
     {
         string tempPath = Path.Combine(Path.GetTempPath(), $"culture_{Guid.NewGuid()}.csv");
         CultureInfo previousCulture = CultureInfo.CurrentCulture;
@@ -127,13 +132,13 @@ public class SepCsvUtilTests : HostedUnitTest
             result[0].Balance.Should().Be(12.5m);
             result[0].BirthDate.Should().Be(people[0].BirthDate);
             result[0].Note.Should().BeEmpty();
-            File.ReadAllText(tempPath).Should().NotContain("DisplayName");
+            (await _fileUtil.Read(tempPath)).Should().NotContain("DisplayName");
         }
         finally
         {
             CultureInfo.CurrentCulture = previousCulture;
-            if (File.Exists(tempPath))
-                File.Delete(tempPath);
+            if ((await _fileUtil.Exists(tempPath)))
+                await _fileUtil.Delete(tempPath);
         }
     }
 }
