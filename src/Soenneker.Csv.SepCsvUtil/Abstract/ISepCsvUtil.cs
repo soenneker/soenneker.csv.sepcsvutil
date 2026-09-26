@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Collections.Generic;
 
 namespace Soenneker.Csv.SepCsvUtil.Abstract;
 
@@ -15,7 +16,8 @@ public interface ISepCsvUtil
     /// <typeparam name="T">The type to deserialize each row into.</typeparam>
     /// <param name="path">The full file path of the CSV file to read.</param>
     /// <returns>A list of deserialized objects of type <typeparamref name="T"/>.</returns>
-    List<T> Read<T>(string path);
+    [RequiresDynamicCode("Reading arbitrary collection properties can require runtime generic instantiations.")]
+    List<T> Read<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>(string path);
 
     /// <summary>
     /// Writes objects to a comma-separated file using invariant formatting. Public readable and settable properties become columns.
@@ -23,5 +25,5 @@ public interface ISepCsvUtil
     /// <typeparam name="T">The type of objects to serialize.</typeparam>
     /// <param name="objects">The list of objects to write to the file.</param>
     /// <param name="filePath">The full file path to write the CSV output to.</param>
-    void Write<T>(List<T> objects, string filePath);
+    void Write<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(List<T> objects, string filePath);
 }

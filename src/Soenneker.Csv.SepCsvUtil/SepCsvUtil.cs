@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using Soenneker.Csv.SepCsvUtil.Abstract;
 using System;
 using System.Collections.Concurrent;
@@ -27,7 +28,8 @@ public sealed class SepCsvUtil : ISepCsvUtil
         _logger = logger;
     }
 
-    public List<T> Read<T>(string path)
+    [RequiresDynamicCode("Reading arbitrary collection properties can require runtime generic instantiations.")]
+    public List<T> Read<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>(string path)
     {
         _logger.LogDebug("%% CSVUTIL: -- Reading CSV from {path} ...", path);
 
@@ -70,7 +72,7 @@ public sealed class SepCsvUtil : ISepCsvUtil
         return objects;
     }
 
-    public void Write<T>(List<T> objects, string filePath)
+    public void Write<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(List<T> objects, string filePath)
     {
         using SepWriter writer = Sep.New(',').Writer(o => o).ToFile(filePath);
 
@@ -91,9 +93,9 @@ public sealed class SepCsvUtil : ISepCsvUtil
         }
     }
 
-    private static PropertyInfo[] GetCachedProperties(Type type)
+    private static PropertyInfo[] GetCachedProperties([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
-        return _propertyCache.GetOrAdd(type, static t => t.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+        return _propertyCache.GetOrAdd(type, _ => type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                                                            .Where(static property => property.CanRead && property.CanWrite &&
                                                                property.GetIndexParameters().Length == 0)
                                                            .ToArray());
@@ -110,7 +112,7 @@ public sealed class SepCsvUtil : ISepCsvUtil
         _ => value.ToString() ?? string.Empty
     };
 
-    private static T CreateInstance<T>()
+    private static T CreateInstance<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>()
     {
         Type type = typeof(T);
 
@@ -118,10 +120,10 @@ public sealed class SepCsvUtil : ISepCsvUtil
         if (type.IsValueType)
             return default!;
 
-        Func<object> ctor = _constructorCache.GetOrAdd(type, static t =>
+        Func<object> ctor = _constructorCache.GetOrAdd(type, _ =>
         {
-            ConstructorInfo ctorInfo = t.GetConstructor(Type.EmptyTypes)
-                                       ?? throw new InvalidOperationException($"Type {t.FullName} does not have a parameterless constructor.");
+            ConstructorInfo ctorInfo = type.GetConstructor(Type.EmptyTypes)
+                                       ?? throw new InvalidOperationException($"Type {type.FullName} does not have a parameterless constructor.");
 
             Expression<Func<object>> lambda = Expression.Lambda<Func<object>>(Expression.New(ctorInfo));
             return lambda.Compile();
