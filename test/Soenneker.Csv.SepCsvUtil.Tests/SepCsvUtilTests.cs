@@ -31,7 +31,7 @@ public class SepCsvUtilTests : HostedUnitTest
     }
 
     [Test]
-    public async Task Write_And_Read_Should_Preserve_Data()
+    public async ValueTask Write_And_Read_Should_Preserve_Data()
     {
         // Arrange
         string tempPath = Path.Combine(Path.GetTempPath(), $"people_{Guid.NewGuid()}.csv");
@@ -66,7 +66,7 @@ public class SepCsvUtilTests : HostedUnitTest
     }
 
     [Test]
-    public async Task Read_Should_Handle_Empty_File()
+    public async ValueTask Read_Should_Handle_Empty_File()
     {
         // Arrange
         string tempPath = Path.Combine(Path.GetTempPath(), $"empty_{Guid.NewGuid()}.csv");
@@ -83,7 +83,7 @@ public class SepCsvUtilTests : HostedUnitTest
     }
 
     [Test]
-    public async Task Write_Should_Create_File()
+    public async ValueTask Write_Should_Create_File()
     {
         // Arrange
         string tempPath = Path.Combine(Path.GetTempPath(), $"write_{Guid.NewGuid()}.csv");
@@ -105,7 +105,7 @@ public class SepCsvUtilTests : HostedUnitTest
     }
 
     [Test]
-    public async Task Write_And_Read_Use_Invariant_Formats_And_Preserve_Empty_Strings()
+    public async ValueTask Write_And_Read_Use_Invariant_Formats_And_Preserve_Empty_Strings()
     {
         string tempPath = Path.Combine(Path.GetTempPath(), $"culture_{Guid.NewGuid()}.csv");
         CultureInfo previousCulture = CultureInfo.CurrentCulture;
