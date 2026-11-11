@@ -19,7 +19,7 @@
 
     <ItemGroup>
         <PackageReference Include="Soenneker.Utils.Test" Version="11.0.347" />
-        <PackageReference Include="Soenneker.Tests.HostedUnit" Version="11.0.363" />
+        <PackageReference Include="Soenneker.Tests.HostedUnit" Version="11.0.367" />
         <PackageReference Include="TUnit" Version="1.83.0" />
     </ItemGroup>
 
@@ -30,7 +30,7 @@
         <PackageReference Include="AwesomeAssertions" Version="9.6.0" />
     </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Soenneker.Utils.File" Version="11.0.2335" />
+    <PackageReference Include="Soenneker.Utils.File" Version="11.0.2338" />
   </ItemGroup>
 </Project>
 
