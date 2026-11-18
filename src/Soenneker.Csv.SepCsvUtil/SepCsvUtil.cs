@@ -31,7 +31,8 @@ public sealed class SepCsvUtil : ISepCsvUtil
     [RequiresDynamicCode("Reading arbitrary collection properties can require runtime generic instantiations.")]
     public List<T> Read<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>(string path)
     {
-        _logger.LogDebug("%% CSVUTIL: -- Reading CSV from {path} ...", path);
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("%% CSVUTIL: -- Reading CSV from {path} ...", path);
 
         using SepReader reader = Sep.Reader().FromFile(path);
 
